@@ -1,0 +1,10 @@
+---
+
+ - name: AnsibleHardening
+   hosts: all
+
+   roles:
+     - AnsibleHardening
+
+
+
