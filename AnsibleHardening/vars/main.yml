@@ -1,0 +1,13 @@
+---
+# vars file for AnsibleHardening
+
+UsernameList:
+ - {
+     Username: "support", 
+     PrimaryGroup: "support",
+     OtherGroups: "",
+     Home: "/home/suport", 
+     Comment: "Cognyte Support User",
+     Shell: "/bin/bash", 
+     Password: "ROJOEJPY5M/DAZ0YBp7MFefBSBF9zy3NwNh6pZOpf9PhGecI1zJqaxHoRJgCh3e"
+   }

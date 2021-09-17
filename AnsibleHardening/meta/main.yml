@@ -1,0 +1,8 @@
+galaxy_info:
+  author: Ariel Dalefe Alves
+  description: create AnsibleHardFixRepo for Asturias Project
+  company: Cognyte - Devops.BR
+  license: license (GPL-2.0-or-later, MIT, etc)
+  min_ansible_version: 2.6
+dependencies: []
+

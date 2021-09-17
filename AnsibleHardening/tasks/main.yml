@@ -1,0 +1,286 @@
+---
+# tasks file for AnsibleBasicHardening
+## Ariel Dalefe Alves (arielalves.consulting@cognyte.com)
+## DevOPS.BR TEAM  (devops.br@cognyte.com)
+
+- name: Install a list of packages with a list variable
+  yum:
+    name: "{{ packages }}"
+    state: 'present'
+    update_cache: 'yes'
+  vars:
+    packages:
+    - tcpdump
+    - sysstat
+    - htop 
+    - curl
+    - rsync
+    - audit
+    - audit-libs
+
+- name: Create Special Rules Audit daemon
+  ansible.builtin.copy:
+    src: ../files/50-access.rules
+    dest: /etc/audit/rules.d/50-access.rules
+    owner: root
+    group: root
+    mode: '0644'
+    force: no
+
+- name: Create Profile Devops.sh 
+  ansible.builtin.copy:
+    src: ../files/devops.sh
+    dest: /etc/profile.d/devops.sh
+    owner: root
+    group: root
+    mode: '0644'
+    force: no
+
+- name: Create issue.net Warning
+  ansible.builtin.copy:
+    src: ../files/issue.net
+    dest: /etc/issue.net
+    owner: root
+    group: root
+    mode: '0644'
+    force: yes
+
+- name: Ensure group support exists
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - support  
+
+- name: Create users in Servers Linux
+  user:
+    name: "{{ item.Username }}"
+    password: "{{ item.Password | password_hash('sha512') }}"
+    group: "{{ item.PrimaryGroup | default(omit) }}"
+    groups: "{{ item.OtherGroups | default(omit) }}"
+    shell: "{{ item.Shell | default(omit) }}"
+    createhome: yes
+    home: "{{ item.Home | default(omit) }}"
+    comment: "{{ item.Comment }}"
+    state: present
+    update_password: always 
+    expires: -1 
+  with_items: "{{ UsernameList }}"
+
+  
+- name: Add NOPASSWD to group support to /etc/sudoers file
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: '%{{ item.PrimaryGroup }} ALL=(ALL) NOPASSWD: ALL'
+    validate: /usr/sbin/visudo -cf %s
+  with_items: "{{ UsernameList }}"
+ 
+- name: Remove a unsable packages 
+  yum:
+    name: "{{ packages }}"
+    state: 'absent'
+    update_cache: 'yes'
+  vars:
+    packages:
+    - prelink
+    - autofs
+    - setroubleshoot
+    - mcstrans
+    - xinetd
+    - avahi
+    - avahi-autoipd
+    - cups
+    - dhcp
+    - openldap-servers
+    - bind
+    - dovecot
+    - samba
+    - ypserv
+    - telnet-server
+    - rpcbind
+  
+
+- name: Insert Basic Hardening on SSH Daemon File /etc/ssh/sshd_config
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: |
+      Banner /etc/issue.net
+      PermitEmptyPasswords no
+      Protocol 2
+      ClientAliveInterval 900
+      ClientAliveCountMax 2
+      PermitRootLogin yes
+      LogLevel VERBOSE
+      StrictModes yes
+      MaxAuthTries 3
+      MaxSessions 2
+      AllowAgentForwarding no
+      AllowTcpForwarding no
+      X11Forwarding no
+      PermitTunnel no
+      Compression no
+      IgnoreRhosts yes
+      HostbasedAuthentication no 
+      LoginGraceTime 60
+      UseDNS no
+      UsePAM yes
+      maxstartups 10:30:60
+      #AllowGroups support
+
+- name: "Reload OpenSSH Daemon"
+  ansible.builtin.service:
+    name: sshd
+    state: reloaded
+    enabled: yes
+
+- name: "Enable Audit Daemon"
+  ansible.builtin.service:
+    name: auditd
+    state: started
+    enabled: yes
+
+- name: Enable Audit Daemon Rules
+  ansible.builtin.shell: augenrules --load
+
+- name: Mount with protection /dev/shm, /var/tmp filesystem with noexec,nosuid,nodev
+  ansible.posix.mount:
+    path: "{{ item }}"
+    src: tmpfs
+    state: mounted
+    fstype: tmpfs
+    opts: "defaults,rw,nosuid,nodev,noexec,relatime"
+  with_items:
+    - /dev/shm
+    - /var/tmp
+
+- name: Remount with protection /tmp filesystem with noexec,nosuid,nodev
+  ansible.posix.mount:
+    path: "/dev/mapper/vigia-lv_tmp"
+    src: /tmp
+    fstype: xfs
+    state: remounted
+    opts: "defaults,rw,nosuid,nodev,noexec,relatime"
+ 
+- name: Disable net.ipv4.ip_forward in /etc/sysctl.conf
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '0'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Disable net.ipv4.conf.all.send_redirects in /etc/sysctl.conf
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.send_redirects
+    value: '0'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Disable net.ipv4.conf.default.send_redirects in /etc/sysctl.conf
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.send_redirects
+    value: '0'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Route Ipv4 flush
+  ansible.posix.sysctl:
+    name: net.ipv4.route.flush
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+
+- name: Disable net.ipv6.conf.all.disable_ipv6 in /etc/sysctl.conf
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.disable_ipv6
+    value: '0'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Disable net.ipv6.conf.default.disable_ipv6 in /etc/sysctl.conf
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.default.disable_ipv6
+    value: '0'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Set vm.swappiness to use 95% of RAM before to activate Swap
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: '5'
+    state: present
+    reload: yes
+
+- name: Set fs.suid_dumpable to 0 
+  ansible.posix.sysctl:
+    name:  fs.suid_dumpable
+    value: '0'
+    state: present
+    reload: yes
+
+- name: Set kernel.randomize_va_space to 2
+  ansible.posix.sysctl:
+    name:  kernel.randomize_va_space
+    value: '2'
+    state: present
+    reload: yes
+
+- name: Ensure suspicious packets are logged
+  ansible.posix.sysctl:
+    name:  net.ipv4.conf.all.log_martians
+    value: '1'
+    state: present
+    reload: yes
+
+- ansible.posix.sysctl:
+    name:  net.ipv4.conf.default.log_martians
+    value: '1'
+    state: present
+    reload: yes
+
+- ansible.posix.sysctl:
+    name:  net.ipv4.icmp_echo_ignore_broadcasts
+    value: '1'
+    state: present
+    reload: yes
+
+-  ansible.posix.sysctl:
+    name:  net.ipv4.conf.all.rp_filter
+    value: '1'
+    state: present
+    reload: yes
+
+-  ansible.posix.sysctl:
+    name:  net.ipv4.conf.default.rp_filter
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Enable TCP SYN Cookies
+  ansible.posix.sysctl:
+    name:  net.ipv4.tcp_syncookies
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Disable write permission for other users in logfiles of Linux Server
+  ansible.builtin.shell: find /var/log -type f -exec chmod g-wx,o-rwx "{}" +
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+
+- name: "Disable Firewalld Daemon"
+  ansible.builtin.service:
+    name: firewalld
+    enabled: no
+
+
