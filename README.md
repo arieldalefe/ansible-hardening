@@ -1,8 +1,8 @@
 # AnsibleHardening v1.0.0-a
-=========
+--
 
-##### Ariel Dalefe Alves (arielalves.consulting@cognyte.com)
-##### DevOPS.BR TEAM (devops.br@cognyte.com)
+###### \# Ariel Dalefe Alves (arielalves.consulting@cognyte.com) 
+###### \# DevOPS.BR TEAM (devops.br@cognyte.com) 
 
 #### \# Install basic packages RPMs
 
@@ -69,9 +69,9 @@ maxstartups 10:30:60
 #AllowGroups support 
 ```
 
-#### Remount the respective partitions /dev/shm, /var/tmp, /tmp with the protection permissions noexec,nosuid,nodev
+##### \# Remount the respective partitions /dev/shm, /var/tmp, /tmp with the protection permissions noexec,nosuid,nodev
 
-#### Added in systctl.conf file some aditional configurations
+##### \# Added in systctl.conf file some aditional configurations
 
 - Disable net.ipv4.ip_forward 
 - Disable net.ipv4.conf.all.send_redirects
