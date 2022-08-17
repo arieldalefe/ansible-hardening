@@ -1,8 +1,7 @@
-# AnsibleHardening v1.0.0-a
+# ansible hardening CIS based v1.0a
 --
 
-###### \# Ariel Dalefe Alves (arielalves.consulting@cognyte.com) 
-###### \# DevOPS.BR TEAM (devops.br@cognyte.com) 
+###### \# Ariel Dalefe Alves (ariel.dalefe@gmail.com) 
 
 #### \# Install basic packages RPMs
 
@@ -87,4 +86,4 @@ maxstartups 10:30:60
 - Disable write permission for other users in logfiles of Linux Server
   - find /var/log -type f -exec chmod g-wx,o-rwx "{}" +
 
-If you have any sugestions, please let us know :+1: [devops.br@cognyte.com]
+If you have any sugestions, please let us know :+1: [ariel.dalefe@gmail.com]

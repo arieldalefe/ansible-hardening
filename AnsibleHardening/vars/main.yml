@@ -3,11 +3,11 @@
 
 UsernameList:
  - {
-     Username: "support", 
-     PrimaryGroup: "support",
-     OtherGroups: "",
-     Home: "/home/suport", 
-     Comment: "Cognyte Support User",
+     Username: "ariel", 
+     PrimaryGroup: "root",
+     OtherGroups: "admin",
+     Home: "/home/ariel", 
+     Comment: "Administrators",
      Shell: "/bin/bash", 
-     Password: "ROJOEJPY5M/DAZ0YBp7MFefBSBF9zy3NwNh6pZOpf9PhGecI1zJqaxHoRJgCh3e"
+     Password: "R9zy3NwNh6pZOpf9PhOJOEJPY5M/DAZ0YBp7MFefBSBFecI1zJqaxHoRJgCh3e"
    }

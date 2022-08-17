@@ -1,7 +1,7 @@
 ---
 # tasks file for AnsibleBasicHardening
-## Ariel Dalefe Alves (arielalves.consulting@cognyte.com)
-## DevOPS.BR TEAM  (devops.br@cognyte.com)
+## Ariel Dalefe Alves (ariel.dalefe@gmail.com)
+
 
 - name: Install a list of packages with a list variable
   yum:
@@ -17,6 +17,7 @@
     - rsync
     - audit
     - audit-libs
+    - nmap-ncat
 
 - name: Create Special Rules Audit daemon
   ansible.builtin.copy:
@@ -45,36 +46,36 @@
     mode: '0644'
     force: yes
 
-- name: Ensure group support exists
-  ansible.builtin.group:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - support  
-
-- name: Create users in Servers Linux
-  user:
-    name: "{{ item.Username }}"
-    password: "{{ item.Password | password_hash('sha512') }}"
-    group: "{{ item.PrimaryGroup | default(omit) }}"
-    groups: "{{ item.OtherGroups | default(omit) }}"
-    shell: "{{ item.Shell | default(omit) }}"
-    createhome: yes
-    home: "{{ item.Home | default(omit) }}"
-    comment: "{{ item.Comment }}"
-    state: present
-    update_password: always 
-    expires: -1 
-  with_items: "{{ UsernameList }}"
-
-  
-- name: Add NOPASSWD to group support to /etc/sudoers file
-  ansible.builtin.lineinfile:
-    path: /etc/sudoers
-    state: present
-    line: '%{{ item.PrimaryGroup }} ALL=(ALL) NOPASSWD: ALL'
-    validate: /usr/sbin/visudo -cf %s
-  with_items: "{{ UsernameList }}"
+#- name: Ensure group support exists
+#  ansible.builtin.group:
+#    name: "{{ item }}"
+#    state: present
+#  loop:
+#    - support  
+#
+#- name: Create users in Servers Linux
+#  user:
+#    name: "{{ item.Username }}"
+#    password: "{{ item.Password | password_hash('sha512') }}"
+#    group: "{{ item.PrimaryGroup | default(omit) }}"
+#    groups: "{{ item.OtherGroups | default(omit) }}"
+#    shell: "{{ item.Shell | default(omit) }}"
+#    createhome: yes
+#    home: "{{ item.Home | default(omit) }}"
+#    comment: "{{ item.Comment }}"
+#    state: present
+#    update_password: always 
+#    expires: -1 
+#  with_items: "{{ UsernameList }}"
+#
+#  
+#- name: Add NOPASSWD to group support to /etc/sudoers file
+#  ansible.builtin.lineinfile:
+#    path: /etc/sudoers
+#    state: present
+#    line: '%{{ item.PrimaryGroup }} ALL=(ALL) NOPASSWD: ALL'
+#    validate: /usr/sbin/visudo -cf %s
+#  with_items: "{{ UsernameList }}"
  
 - name: Remove a unsable packages 
   yum:
@@ -110,7 +111,8 @@
       Protocol 2
       ClientAliveInterval 900
       ClientAliveCountMax 2
-      PermitRootLogin yes
+      ChallengeResponseAuthentication no
+      PermitRootLogin no
       LogLevel VERBOSE
       StrictModes yes
       MaxAuthTries 3
@@ -120,6 +122,8 @@
       X11Forwarding no
       PermitTunnel no
       Compression no
+      AuthenticationMethods publickey
+      PubkeyAuthentication yes
       IgnoreRhosts yes
       HostbasedAuthentication no 
       LoginGraceTime 60
@@ -154,13 +158,13 @@
     - /dev/shm
     - /var/tmp
 
-- name: Remount with protection /tmp filesystem with noexec,nosuid,nodev
-  ansible.posix.mount:
-    path: "/dev/mapper/vigia-lv_tmp"
-    src: /tmp
-    fstype: xfs
-    state: remounted
-    opts: "defaults,rw,nosuid,nodev,noexec,relatime"
+#- name: Remount with protection /tmp filesystem with noexec,nosuid,nodev
+#  ansible.posix.mount:
+#    path: "/dev/mapper/vigia-lv_tmp"
+#    src: /tmp
+#    fstype: xfs
+#    state: remounted
+#    opts: "defaults,rw,nosuid,nodev,noexec,relatime"
  
 - name: Disable net.ipv4.ip_forward in /etc/sysctl.conf
   ansible.posix.sysctl:
