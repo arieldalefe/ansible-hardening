@@ -86,4 +86,4 @@ AllowGroups admin
 - Disable write permission for other users in logfiles of Linux Server
   - find /var/log -type f -exec chmod g-wx,o-rwx "{}" +
 
-If you have any sugestions, please let us know :+1: [ariel.dalefe@gmail.com]
+If you have any sugestions, please let me know :+1: [ariel.dalefe@gmail.com]
