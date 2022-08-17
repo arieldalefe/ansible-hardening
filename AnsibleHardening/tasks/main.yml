@@ -130,7 +130,7 @@
       UseDNS no
       UsePAM yes
       maxstartups 10:30:60
-      #AllowGroups support
+      AllowGroups admin
 
 - name: "Reload OpenSSH Daemon"
   ansible.builtin.service:

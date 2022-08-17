@@ -51,8 +51,8 @@ PermitEmptyPasswords no
 Protocol 2 
 ClientAliveInterval 900 
 ClientAliveCountMax 2 
-PermitRootLogin yes 
-LogLevel VERBOSE If you have any sugestions, please let us know :+1: [devops.br@cognyte.com]
+PermitRootLogin no
+LogLevel VERBOSE
 MaxSessions 2 
 AllowAgentForwarding no 
 AllowTcpForwarding no 
@@ -65,7 +65,7 @@ LoginGraceTime 60
 UseDNS no 
 UsePAM yes
 maxstartups 10:30:60 
-#AllowGroups support 
+AllowGroups admin
 ```
 
 ##### \# Remount the respective partitions /dev/shm, /var/tmp, /tmp with the protection permissions noexec,nosuid,nodev
